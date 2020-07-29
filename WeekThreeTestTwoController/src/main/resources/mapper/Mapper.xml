@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ypf.mapper.SpecialMapper">
+	<resultMap type="com.ypf.beans.Special" id="resultMap">
+		<id column="sid" property="sid"/>
+		<result column="title" property="title"/>
+		<result column="abs" property="abs"/>
+		<result column="created" property="created"/>
+		<collection property="articleList" javaType="java.util.List" ofType="com.ypf.beans.Article" column="sid"
+		select="com.ypf.mapper.SpecialMapper.queryArticleBySid">
+		</collection>
+	</resultMap>
+
+	<!-- 首页列表查询,前台专题展示 -->
+	<select id="querySpecialAll" resultMap="resultMap">
+		select * from special
+	</select>
+	
+	<!-- 文章列表展示 -->
+	<select id="queryArticleAll" resultType="com.ypf.beans.Article">
+		select * from article
+	</select>
+	
+	<!-- 专题列表展示 -->
+	<select id="querySpecial" resultType="com.ypf.beans.Special">
+		select *,(select count(*) from special_article sa where s.sid = sa.sid) as acount from special s
+	</select>
+		
+	<!-- 查询该专题下所有文章 -->
+	<select id="queryArticleBySid" resultType="com.ypf.beans.Article" parameterType="int">
+		select * from article a,special_article sa where a.aid = sa.aid and sa.sid = #{0}
+	</select>
+	
+	<!-- 添加专题 -->
+	<insert id="addSpecial" parameterType="com.ypf.beans.Special">
+		insert into special
+		(title,abs,created)
+		values
+		(#{title},#{abs},now())
+	</insert>
+	
+	<!-- 专题根据Sid回显 -->
+	<select id="findBySid" resultType="com.ypf.beans.Special" parameterType="int">
+		select * from special where sid = #{0}
+	</select>
+	
+	<!-- 修改专题 -->
+	<update id="updateSpecial" parameterType="com.ypf.beans.Special">
+		update special set
+		title=#{title},abs=#{abs},created=now()
+		where sid=#{sid}
+	</update>
+	
+	<!-- 添加某专题下的文章 -->
+	<insert id="addSA" parameterType="com.ypf.beans.SpecialArticle">
+		insert into special_article
+		(aid,sid)
+		values
+		(#{aid},#{sid})
+	</insert>
+	
+	<!-- 根据文章id判断文章是否存在 -->
+	<select id="queryArticleByAid" resultType="com.ypf.beans.Article" parameterType="int">
+		select * from article where aid=#{0}
+	</select>
+	
+	<!-- 移除某专题下的文章 -->
+	<delete id="delSA" parameterType="int">
+		delete from special_article where aid=#{0}
+	</delete>
+	
+	<!-- 添加文章 -->
+	<insert id="addArticle" parameterType="com.ypf.beans.Article">
+		insert into article
+		(title,content,created)
+		values
+		(#{title},#{content},now())
+	</insert>
+</mapper>
